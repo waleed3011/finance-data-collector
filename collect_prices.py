@@ -9,10 +9,8 @@ TICKERS = {
     "IS3N.DE":  "iShares EM IMI",
     "IUSN.DE":  "iShares MSCI World Small Cap",
     "VWCE.DE":  "Vanguard FTSE All-World",
-    # Just add new tickers here — nothing else needs to change
 }
 
-# Date to fetch FROM when no existing data is found for a ticker
 DEFAULT_START_DATE = "2025-01-01"
 # ───────────────────────────────────────────────────────────────────────────
 
@@ -21,20 +19,16 @@ TODAY       = datetime.today().strftime("%Y-%m-%d")
 
 
 def load_existing() -> pd.DataFrame:
-    """Load existing CSV if it exists, otherwise return empty DataFrame."""
     if os.path.exists(OUTPUT_FILE):
         df = pd.read_csv(OUTPUT_FILE, parse_dates=["Date"])
         df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
+        print(f"📂 Loaded {len(df)} existing rows from {OUTPUT_FILE}")
         return df
+    print(f"📂 No existing CSV found — starting fresh")
     return pd.DataFrame(columns=["Date", "Ticker", "Name", "Price", "Currency"])
 
 
 def get_start_date_for_ticker(ticker: str, existing: pd.DataFrame) -> str:
-    """
-    Smart start date logic:
-    - If ticker already has data → fetch from day after last entry
-    - If ticker is new → fetch from DEFAULT_START_DATE
-    """
     ticker_data = existing[existing["Ticker"] == ticker]
     if ticker_data.empty:
         print(f"  📦 New ticker {ticker} — fetching from {DEFAULT_START_DATE}")
@@ -47,18 +41,26 @@ def get_start_date_for_ticker(ticker: str, existing: pd.DataFrame) -> str:
 
 
 def fetch_ticker(ticker: str, name: str, start_date: str) -> pd.DataFrame:
-    """Fetch price history for a single ticker from start_date to today."""
     if start_date > TODAY:
         print(f"  ✅ {ticker} already up to date")
         return pd.DataFrame()
 
     try:
-        data  = yf.Ticker(ticker)
-        hist  = data.history(start=start_date, end=TODAY)
+        print(f"  ⬇️  Fetching {ticker} from {start_date} to {TODAY}...")
+        data     = yf.Ticker(ticker)
+        hist     = data.history(start=start_date, end=TODAY)
+
+        # Print raw response for debugging
+        print(f"      Raw rows returned: {len(hist)}")
+        if not hist.empty:
+            print(f"      First row: {hist.index[0].strftime('%Y-%m-%d')} | Close: {hist['Close'].iloc[0]}")
+            print(f"      Last row:  {hist.index[-1].strftime('%Y-%m-%d')} | Close: {hist['Close'].iloc[-1]}")
+
         currency = data.info.get("currency", "N/A")
+        print(f"      Currency: {currency}")
 
         if hist.empty:
-            print(f"  ⚠️  No data returned for {ticker}")
+            print(f"  ⚠️  No data returned for {ticker} — check ticker symbol on finance.yahoo.com")
             return pd.DataFrame()
 
         rows = []
@@ -71,16 +73,15 @@ def fetch_ticker(ticker: str, name: str, start_date: str) -> pd.DataFrame:
                 "Currency": currency,
             })
 
-        print(f"  ✅ {ticker}: {len(rows)} new rows fetched")
+        print(f"  ✅ {ticker}: {len(rows)} rows fetched")
         return pd.DataFrame(rows)
 
     except Exception as e:
-        print(f"  ❌ Error fetching {ticker}: {e}")
+        print(f"  ❌ Exception fetching {ticker}: {type(e).__name__}: {e}")
         return pd.DataFrame()
 
 
 def save(existing: pd.DataFrame, new_data: pd.DataFrame):
-    """Merge new data with existing, deduplicate, sort, and save."""
     os.makedirs("data", exist_ok=True)
 
     combined = pd.concat([existing, new_data], ignore_index=True)
@@ -89,10 +90,12 @@ def save(existing: pd.DataFrame, new_data: pd.DataFrame):
     combined.to_csv(OUTPUT_FILE, index=False)
 
     print(f"\n💾 Saved {len(combined)} total rows to {OUTPUT_FILE}")
+    print(combined.tail(10).to_string())  # Print last 10 rows to confirm
 
 
 def main():
     print(f"🚀 Starting price collection — {TODAY}\n")
+    print(f"📋 Tickers configured: {list(TICKERS.keys())}\n")
 
     existing = load_existing()
     all_new  = []
@@ -107,7 +110,10 @@ def main():
         new_data = pd.concat(all_new, ignore_index=True)
         save(existing, new_data)
     else:
-        print("\n✅ All tickers already up to date — nothing to commit")
+        # ── KEY FIX: Always write the file, even if no new data ────────────
+        # This prevents the Git step from failing with "pathspec did not match"
+        print("\n⚠️  No new data fetched — saving existing data to ensure file exists")
+        save(existing, pd.DataFrame(columns=["Date", "Ticker", "Name", "Price", "Currency"]))
 
 
 if __name__ == "__main__":
