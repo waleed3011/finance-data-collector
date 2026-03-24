@@ -46,6 +46,12 @@ def fetch_data(tickers, start, end):
 
 def main():
     df = fetch_data(TICKERS, START_DATE, END_DATE)
+
+    # Forward fill per ticker, only after its first valid value
+    df["Date"] = pd.to_datetime(df["Date"])
+    df = df.sort_values(["Ticker", "Date"])
+    df["Close"] = df.groupby("Ticker")["Close"].transform(lambda x: x.ffill())
+    df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
     
     # Long format (one row per ticker per date) — best for Power Query
     df.to_csv("data/prices_long.csv", index=False)
