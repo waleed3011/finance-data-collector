@@ -10,7 +10,7 @@ TICKERS = [
     "NOK=X", # USD/NOK
     "SEKNOK=X", #SEK/NOK
     "DKKNOK=X", #DKK/NOK
-    "0P00018CRD.IR" # ODIN Kreditt D
+    "0P00018CRD.IR", # ODIN Kreditt D
     "0P0001OPC5.IR", # KLP AksjeVerden Indeks N
     "0P0001OPBL.IR", # KLP AksjeGlobal Indeks N
     "0P0001RFXW.IR", # Heimdal Utbytte N
