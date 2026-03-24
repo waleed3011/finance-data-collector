@@ -1,6 +1,8 @@
 import yfinance as yf
 import pandas as pd
 from datetime import date
+import os
+os.makedirs("data", exist_ok=True)
 
 # --- CONFIGURE YOUR TICKERS HERE ---
 TICKERS = [
