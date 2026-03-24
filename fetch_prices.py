@@ -36,7 +36,17 @@ def fetch_prices(tickers: list[str], start: str, end: str) -> pd.DataFrame:
             if df.empty:
                 print(f"No data for {ticker}")
                 continue
-            frames[ticker] = df["Close"].squeeze()
+            # Handle multi-level columns (common with currency pairs)
+            if isinstance(df.columns, pd.MultiIndex):
+                close = df["Close"].squeeze()
+            else:
+                close = df["Close"].squeeze()
+            
+            if isinstance(close, pd.DataFrame):
+                close = close.iloc[:, 0]
+            
+            frames[ticker] = close
+            print(f"OK: {ticker} — {len(close)} rows")
         except Exception as e:
             print(f"Failed to fetch {ticker}: {e}")
 
@@ -47,7 +57,6 @@ def fetch_prices(tickers: list[str], start: str, end: str) -> pd.DataFrame:
     wide.index = pd.to_datetime(wide.index).normalize()
     wide.index.name = "Date"
     return wide
-
 
 def forward_fill_after_listing(wide: pd.DataFrame) -> pd.DataFrame:
     """
