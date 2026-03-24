@@ -47,21 +47,35 @@ def fetch_data(tickers, start, end):
 def main():
     df = fetch_data(TICKERS, START_DATE, END_DATE)
 
-    # Forward fill per ticker, only after its first valid value
     df["Date"] = pd.to_datetime(df["Date"])
+
+    # Build a complete date spine from START_DATE to END_DATE
+    all_dates = pd.date_range(start=START_DATE, end=END_DATE, freq="D")
+    all_tickers = df["Ticker"].unique()
+
+    # Create a full grid: every date x every ticker
+    spine = pd.MultiIndex.from_product([all_dates, all_tickers], names=["Date", "Ticker"])
+    spine_df = pd.DataFrame(index=spine).reset_index()
+
+    # Merge actual data onto the full grid
+    df = spine_df.merge(df, on=["Date", "Ticker"], how="left")
+
+    # Forward fill per ticker, only after its first valid value
     df = df.sort_values(["Ticker", "Date"])
     df["Close"] = df.groupby("Ticker")["Close"].transform(lambda x: x.ffill())
+
     df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
 
-    # Long format
-    df.to_csv("data/prices_long.csv", index=False)
+    # Long format — drop rows that are still NaN (i.e. before listing date)
+    long = df.dropna(subset=["Close"])
+    long.to_csv("data/prices_long.csv", index=False)
 
     # Wide format
     wide = df.pivot(index="Date", columns="Ticker", values="Close")
     wide.to_csv("data/prices_wide.csv")
 
-    print(f"Exported {len(df)} rows across {df['Ticker'].nunique()} tickers")
-    print(f"Date range: {df['Date'].min()} → {df['Date'].max()}")
+    print(f"Exported {len(long)} rows across {long['Ticker'].nunique()} tickers")
+    print(f"Date range: {long['Date'].min()} → {long['Date'].max()}")
 
 if __name__ == "__main__":
     main()
