@@ -20,7 +20,7 @@ TICKERS = [
     "0P0001KO97.IR", # Storebrand Global Obligasjon N
 ]
 
-START_DATE = "2025-01-01"
+START_DATE = "2023-01-01"
 END_DATE = date.today().isoformat()
 
 def fetch_data(tickers, start, end):
