@@ -18,6 +18,12 @@ TICKERS = [
     "0P00000SFV.F", # Danske Invest Europe Hgh Dvd A
     "0P0001OPBE.IR", # KLP AksjeFremvoksende Markeder Indeks N
     "0P0001KO97.IR", # Storebrand Global Obligasjon N
+    "0P0000J24W.ST", # Nordnet Sverige Index
+    "0P000134K9.F", # Nordnet Suomi Indeksi
+    "0P000134K7.IR", # Nordnet Norge Indeks
+    "0P0001K6NJ.IR", # Nordnet Global Indeks NOK
+    "0P0001K6NB.IR", # Nordnet Emerging Markets Indeks
+    "0P0001KRXX.CO", # Nordnet Danmark Indeks B
 ]
 
 START_DATE = "2023-01-01"
