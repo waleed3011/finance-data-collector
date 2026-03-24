@@ -6,9 +6,18 @@ os.makedirs("data", exist_ok=True)
 
 # --- CONFIGURE YOUR TICKERS HERE ---
 TICKERS = [
-    "AAPL", "MSFT", "EQNR.OL",   # stocks
-    "EUNL.DE", "IS3N.DE",          # ETFs
-    # add all your holdings here
+    "EURNOK=X", # EUR/NOK
+    "NOK=X", # USD/NOK
+    "SEKNOK=X", #SEK/NOK
+    "DKKNOK=X", #DKK/NOK
+    "0P00018CRD.IR" # ODIN Kreditt D
+    "0P0001OPC5.IR", # KLP AksjeVerden Indeks N
+    "0P0001OPBL.IR", # KLP AksjeGlobal Indeks N
+    "0P0001RFXW.IR", # Heimdal Utbytte N
+    "0P00000ODE.IR", # DNB SMB A
+    "0P00000SFV.F", # Danske Invest Europe Hgh Dvd A
+    "0P0001OPBE.IR", # KLP AksjeFremvoksende Markeder Indeks N
+    "0P0001KO97.IR", # Storebrand Global Obligasjon N
 ]
 
 START_DATE = "2025-01-01"
