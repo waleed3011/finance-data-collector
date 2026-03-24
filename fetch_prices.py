@@ -52,14 +52,14 @@ def main():
     df = df.sort_values(["Ticker", "Date"])
     df["Close"] = df.groupby("Ticker")["Close"].transform(lambda x: x.ffill())
     df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
-    
-    # Long format (one row per ticker per date) — best for Power Query
+
+    # Long format
     df.to_csv("data/prices_long.csv", index=False)
-    
-    # Wide format (dates as rows, tickers as columns) — alternative
+
+    # Wide format
     wide = df.pivot(index="Date", columns="Ticker", values="Close")
     wide.to_csv("data/prices_wide.csv")
-    
+
     print(f"Exported {len(df)} rows across {df['Ticker'].nunique()} tickers")
     print(f"Date range: {df['Date'].min()} → {df['Date'].max()}")
 
