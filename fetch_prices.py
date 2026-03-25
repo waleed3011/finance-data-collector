@@ -55,27 +55,22 @@ def fetch_data(tickers, start, end):
 
 
 def fetch_norway_10y(start, end):
-    """Fetch Norway 10-year government bond yield from Norges Bank open API."""
+    """Fetch Norway 10-year generic government bond yield from Norges Bank API."""
     url = (
-        f"https://data.norges-bank.no/api/data/IR/B.GBON.10Y."
+        f"https://data.norges-bank.no/api/data/GOVT_GENERIC_RATES/B.10Y.GBON."
         f"?format=csv&startPeriod={start}&endPeriod={end}&locale=en"
     )
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
 
-        # Norges Bank CSV has a metadata header — skip lines starting with #
-        lines = [l for l in response.text.splitlines() if not l.startswith("#")]
-        clean_csv = "\n".join(lines)
-
-        df = pd.read_csv(io.StringIO(clean_csv), sep=";")
-
-        # Keep only date and value columns, rename to match our schema
+        df = pd.read_csv(io.StringIO(response.text), sep=";")
         df = df[["TIME_PERIOD", "OBS_VALUE"]].copy()
         df.columns = ["Date", "Close"]
         df["Date"] = pd.to_datetime(df["Date"])
         df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
         df["Ticker"] = "NO10Y"
+        df = df.dropna(subset=["Close"])
 
         print(f"OK: NO10Y (Norges Bank) — {len(df)} rows")
         return df
