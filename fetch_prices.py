@@ -29,7 +29,7 @@ TICKERS = [
     "0P0001KRXX.CO",  # Nordnet Danmark Indeks B
 ]
 
-START_DATE = "2016-01-01"
+START_DATE = "2022-01-01"
 END_DATE = date.today().isoformat()
 
 
