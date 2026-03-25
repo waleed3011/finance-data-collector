@@ -8,6 +8,7 @@ import os
 os.makedirs("data", exist_ok=True)
 
 TICKERS = [
+    "^990100-USD-STRD", # MSCI WORLD
     "EURNOK=X",       # EUR/NOK
     "NOK=X",          # USD/NOK
     "SEKNOK=X",       # SEK/NOK
